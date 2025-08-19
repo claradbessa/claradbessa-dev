@@ -1,0 +1,104 @@
+/* --- Configurações Gerais --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #222221;
+    color: #ffffff;
+    /* Usando Arial como alternativa segura para Myriad Pro */
+    font-family: 'Myriad Pro', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+}
+
+/* --- Container Principal --- */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px; /* Espaçamento entre os elementos */
+}
+
+/* --- Logo --- */
+.logo img {
+    max-width: 200px;
+    height: auto;
+}
+
+/* --- Conteúdo de Texto --- */
+.content p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #a0a0a0;
+}
+
+.contact {
+    margin-top: 20px;
+    border-top: 1px solid rgba(32, 156, 255, 0.3); 
+    padding-top: 30px;
+    width: 80%;
+    max-width: 500px;
+}
+
+.contact h1{
+    /* Usando a fonte alternativa 'Exo 2' para o título */
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    
+    /* Degradê aplicado ao texto */
+    background: linear-gradient(90deg, #68e0cf, #209cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.contact p {
+     color: #a0a0a0;
+}
+
+/* --- Links Sociais --- */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 25px; 
+    margin-top: 15px;
+}
+
+.social-links a {
+    color: #a0a0a0; 
+    font-size: 1.8rem; 
+    transition: color 0.3s ease; 
+}
+
+.social-links a:hover {
+    /* 1. Aplicamos o degradê como fundo do link */
+    background: linear-gradient(90deg, #68e0cf, #209cff);
+    
+    /* 2. Recortamos o fundo para ter o mesmo formato do ícone (texto) */
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* 3. Deixando a cor do ícone transparente, revelando o fundo de degradê */
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- Responsividade para Telas Menores --- */
+@media (max-width: 600px) {
+    .content h1 {
+        font-size: 2.5rem;
+    }
+
+    .content h2 {
+        font-size: 1rem;
+    }
+}

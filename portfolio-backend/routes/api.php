@@ -35,3 +35,6 @@ Route::middleware(['auth:sanctum'])->prefix('panel')->group(function () {
     Route::post('/home', [HomePageController::class, 'update']);
 
 });
+
+// Importa todas as rotas de autenticação do Breeze (login, logout, etc.) para dentro do prefixo /api
+require __DIR__.'/auth.php';

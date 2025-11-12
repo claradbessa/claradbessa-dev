@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\HomePageController;
+use App\Http\Controllers\Api\AboutPageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\HomePageController;
 |--------------------------------------------------------------------------
 */
 Route::get('/home', [HomePageController::class, 'index']); 
+Route::get('/about', [AboutPageController::class, 'index']);
 
 // Teste de rota
 Route::post('/test-post', function () { 
@@ -33,8 +35,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum'])->prefix('panel')->group(function () {
 
     Route::post('/home', [HomePageController::class, 'update']);
+    Route::post('/about', [AboutPageController::class, 'update']);
 
 });
 
-// Importa todas as rotas de autenticação do Breeze (login, logout, etc.) para dentro do prefixo /api
+// Importa todas as rotas de autenticação do Breeze
 require __DIR__.'/auth.php';

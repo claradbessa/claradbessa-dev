@@ -19,7 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
+    'allowed_origins' => [
+                            env('FRONTEND_URL', 'http://localhost:5173'), // Porta padrão do Vite
+                            'http://localhost:3000',                     // Mantém a 3000 por segurança
+                            'http://claradbessa-dev.test',               // O domínio no Laragon
+                        ],
 
     'allowed_origins_patterns' => [],
 

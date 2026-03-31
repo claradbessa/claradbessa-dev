@@ -7,23 +7,21 @@ return [
     | Cross-Origin Resource Sharing (CORS) Configuration
     |--------------------------------------------------------------------------
     |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
-    |
-    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+    | Aqui você configura quais origens (URLs) podem acessar sua API.
     |
     */
 
-    'paths' => ['*'],
+    // Caminhos que o CORS deve monitorar
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
+    // Origens permitidas (seu Frontend)
     'allowed_origins' => [
-                            env('FRONTEND_URL', 'http://localhost:5173'), // Porta padrão do Vite
-                            'http://localhost:3000',                     // Mantém a 3000 por segurança
-                            'http://claradbessa-dev.test',               // O domínio no Laragon
-                        ],
+        env('FRONTEND_URL', 'http://localhost:5173'), 
+        'http://localhost:3000',
+        'http://claradbessa-dev.test',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -33,6 +31,7 @@ return [
 
     'max_age' => 0,
 
+    // ESSENCIAL: Permite o envio de cookies de sessão (Sanctum)
     'supports_credentials' => true,
 
 ];

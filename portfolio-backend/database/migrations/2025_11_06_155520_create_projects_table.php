@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('cover_image_url');
             $table->text('description');
-            $table->json('stack');
-            $table->json('links');
+            $table->json('stack')->nullable();
+            $table->json('links')->nullable();
             $table->timestamps();
         });
     }

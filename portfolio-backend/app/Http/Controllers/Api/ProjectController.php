@@ -3,77 +3,114 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project; 
+use App\Models\Project;
 use Illuminate\Http\Request;
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Upload\UploadApi;
 
 class ProjectController extends Controller
 {
-    /**
-     * Lista todos os projetos (Público)
-     */
+    private UploadApi $uploadApi;
+
+    public function __construct()
+    {
+        $config = Configuration::instance(config('cloudinary.cloud_url'));
+        $this->uploadApi = new UploadApi($config);
+    }
+
+    private function uploadToCloudinary($file): string
+    {
+        $base64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file));
+
+        $result = $this->uploadApi->upload($base64, [
+            'folder' => 'portfolio/projects'
+        ]);
+
+        return $result['secure_url'];
+    }
+
     public function index()
     {
-        // Retorna todos os projetos do Supabase em ordem do mais recente para o mais antigo
         return response()->json(Project::latest()->get());
     }
 
-    /**
-     * Salva um novo projeto (Privado - /panel/projects)
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'cover_image_url' => 'nullable|url',
-            'stack' => 'nullable|array',
-            'links' => 'nullable|array', 
+            'name'            => 'required|string|max:255',
+            'description'     => 'required|string',
+            'cover_image_url' => 'required|image|max:2048',
+            'stack'           => 'nullable|array',
+            'stack.*'         => 'string',
+            'links'           => 'nullable|array',
         ]);
 
-        $project = Project::create($validated);
+        try {
+            $validated['cover_image_url'] = $this->uploadToCloudinary($request->file('cover_image_url'));
 
-        return response()->json([
-            'message' => 'Projeto criado com sucesso!',
-            'project' => $project
-        ], 201);
+            $project = Project::create($validated);
+
+            return response()->json([
+                'message' => 'Projeto criado com sucesso!',
+                'project' => $project
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'   => 'Erro ao fazer upload para o Cloudinary.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Mostra um projeto específico
-     */
     public function show(Project $project)
     {
         return response()->json($project);
     }
 
-    /**
-     * Atualiza um projeto existente (Privado)
-     */
     public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'cover_image_url' => 'nullable|url',
-            'stack' => 'nullable|array',
-            'links' => 'nullable|array',
+            'name'            => 'sometimes|required|string|max:255',
+            'description'     => 'sometimes|required|string',
+            'cover_image_url' => 'sometimes|image|max:2048',
+            'stack'           => 'nullable|array',
+            'stack.*'         => 'string',
+            'links'           => 'nullable|array',
         ]);
 
-        $project->update($validated);
+        try {
+            if ($request->hasFile('cover_image_url')) {
+                $validated['cover_image_url'] = $this->uploadToCloudinary($request->file('cover_image_url'));
+            }
 
-        return response()->json([
-            'message' => 'Projeto atualizado!',
-            'project' => $project
-        ]);
+            $project->update($validated);
+
+            return response()->json([
+                'message' => 'Projeto atualizado com sucesso!',
+                'project' => $project
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'   => 'Erro ao atualizar projeto.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Remove um projeto (Privado)
-     */
     public function destroy(Project $project)
     {
-        $project->delete();
+        try {
+            $project->delete();
 
-        return response()->json(['message' => 'Projeto excluído com sucesso!']);
+            return response()->json(['message' => 'Projeto excluído com sucesso!']);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'   => 'Erro ao excluir projeto.',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 }

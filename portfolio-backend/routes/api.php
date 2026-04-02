@@ -5,49 +5,54 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\HomePageController;
 use App\Http\Controllers\Api\AboutPageController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\SiteConfigController;
 
 /*
 |--------------------------------------------------------------------------
-| Rotas Públicas 
+| Rotas Públicas (Vitrine)
 |--------------------------------------------------------------------------
 */
 Route::get('/home', [HomePageController::class, 'index']); 
 Route::get('/about', [AboutPageController::class, 'index']);
+Route::get('/configs', [SiteConfigController::class, 'index']);
+Route::get('/projects', [ProjectController::class, 'index']);
+Route::get('/projects/{project}', [ProjectController::class, 'show']);
 
-// Teste de rota
+// Rota de Teste
 Route::post('/test-post', function () { 
     return response()->json(['message' => 'O MÉTODO POST FUNCIONOU!', 'status' => 200]);
 });
 
 /*
-|--- Rotas Públicas ---
+|--------------------------------------------------------------------------
+| Rotas do painel Administrativo
+|--------------------------------------------------------------------------
 */
-Route::get('/projects', [ProjectController::class, 'index']); // Para listar todos
-Route::get('/projects/{project}', [ProjectController::class, 'show']); // Para ver um específico
+Route::middleware(['auth:sanctum'])->group(function () {
+    
+    // Retorna os dados do usuário logado
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 
-/*
-|--------------------------------------------------------------------------
-| Rotas de Autenticação (do Breeze)
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
+    // Todas as rotas abaixo terão o prefixo /api/panel/
+    Route::prefix('panel')->group(function () {
+        
+        // Configurações Gerais
+        Route::put('/configs', [SiteConfigController::class, 'update']);
+
+        // Home e About
+        Route::post('/home', [HomePageController::class, 'update']);
+        Route::post('/about', [AboutPageController::class, 'update']);
+
+        // CRUD de Projetos
+        Route::post('/projects', [ProjectController::class, 'store']);
+        
+        Route::post('/projects/{project}', [ProjectController::class, 'update']); 
+        
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
+    });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Rotas Privadas (com o prefixo "panel")
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:sanctum'])->prefix('panel')->group(function () {
-
-    Route::post('/home', [HomePageController::class, 'update']);
-    Route::post('/about', [AboutPageController::class, 'update']);
-
-    Route::post('/projects', [ProjectController::class, 'store']);
-    Route::put('/projects/{project}', [ProjectController::class, 'update']);
-    Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
-});
-
-// Importa todas as rotas de autenticação do Breeze
+// Importa as rotas de autenticação (Breeze/Sanctum)
 require __DIR__.'/auth.php';

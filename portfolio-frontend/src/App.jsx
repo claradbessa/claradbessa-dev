@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from './services/api';
 import Login from './components/Login';
 import CreateProject from './components/CreateProject';
+import EditableConfig from './components/EditableConfig';
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
@@ -17,12 +18,6 @@ function App() {
     }
   };
 
-  const [configs, setConfigs] = useState({
-    hero_title: 'Carregando...',
-    bio_text: '',
-    linkedin_url: ''
-  });
-
   const loadConfigs = async () => {
     try {
       const res = await api.get('/api/configs');
@@ -34,6 +29,16 @@ function App() {
     }
   };
 
+  const [configs, setConfigs] = useState({
+    hero_title: 'Carregando...',
+    bio_text: '',
+    linkedin_url: ''
+  });
+
+  const updateLocalConfig = (key, value) => {
+    setConfigs(prev => ({ ...prev, [key]: value }));
+  };
+
   useEffect(() => {
     loadProjects();
     loadConfigs();
@@ -41,10 +46,16 @@ function App() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      {/* 1. O Título agora fica fora do Login, visível para todos */}
-      <header style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', color: '#ffffff'}}>{configs.hero_title || 'Carregando...'}</h1>
-      </header>
+      <header style={{ textAlign: 'center', marginBottom: '40px'}}>
+      <h1>
+        <EditableConfig 
+          configKey="hero_title" 
+          value={configs.hero_title} 
+          isLogged={isLogged} 
+          onUpdate={updateLocalConfig} 
+        />
+      </h1>
+    </header>
 
       {!isLogged ? (
         <Login onLoginSuccess={() => setIsLogged(true)} />

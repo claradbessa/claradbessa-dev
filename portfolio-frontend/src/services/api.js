@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://claradbessa-dev.test',
+    baseURL: 'http://claradbessa-dev.test/api',
     withCredentials: true,
     headers: {
         'Accept': 'application/json',

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SiteConfigController;
 */
 Route::get('/home', [HomePageController::class, 'index']); 
 Route::get('/about', [AboutPageController::class, 'index']);
+Route::get('/about', [App\Http\Controllers\Api\AboutPageController::class, 'index']);
 Route::get('/configs', [SiteConfigController::class, 'index']);
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);

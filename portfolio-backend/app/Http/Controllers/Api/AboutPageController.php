@@ -3,44 +3,49 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AboutPage; 
+use App\Models\AboutPage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AboutPageController extends Controller
 {
-    /**
-     * Retorna os dados da página "Sobre Mim".
-     * Rota pública.
-     */
     public function index()
     {
-        // Pega a primeira linha da tabela 'about_page'
         $aboutData = AboutPage::first();
-        
-        // Retorna os dados como JSON
         return response()->json($aboutData);
     }
 
-    /**
-     * Atualiza os dados da página "Sobre Mim".
-     * Rota privada (admin).
-     */
     public function update(Request $request)
     {
-        // 1. Validação 
-        $validatedData = $request->validate([
-            'photo_url' => 'required|url',
-            'bio' => 'required|string',
-            'technologies' => 'required|array', //
+        $request->validate([
+            'photo_url' => 'sometimes',
+            'bio' => 'sometimes|string',
+            'technologies' => 'nullable',
         ]);
 
-        // 2. Atualização
-        $aboutData = AboutPage::updateOrCreate(
-            ['id' => 1], // Encontra a linha com id 1
-            $validatedData // E atualiza com os dados validados
-        );
+        $aboutData = AboutPage::first() ?: new AboutPage();
 
-        // 3. Resposta
+        if ($request->has('bio')) {
+            $aboutData->bio = $request->bio;
+        } elseif (!$aboutData->exists) {
+            $aboutData->bio = ""; 
+        }
+
+        if ($request->hasFile('photo_url')) {
+            $path = $request->file('photo_url')->store('about', 'public');
+            $aboutData->photo_url = asset('storage/' . $path);
+        } elseif ($request->has('photo_url')) {
+            $aboutData->photo_url = $request->photo_url;
+        } elseif (!$aboutData->exists) {
+            $aboutData->photo_url = ""; 
+        }
+
+        if (!$aboutData->exists && !$request->has('technologies')) {
+            $aboutData->technologies = [];
+        }
+
+        $aboutData->save();
+
         return response()->json($aboutData);
     }
 }

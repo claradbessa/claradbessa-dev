@@ -3,6 +3,10 @@ import api from "./services/api";
 import Login from "./components/Login";
 import EditableConfig from "./components/EditableConfig";
 
+import Hero from "./components/sections/Hero";
+import About from "./components/sections/About";
+import Experience from "./components/sections/Experience";
+
 function App() {
   const [isLogged, setIsLogged] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -245,219 +249,30 @@ function App() {
       </nav>
 
       {/* Hero */}
-      <section
-        id="home"
-        className="relative flex items-center min-h-[80vh] py-20"
-      >
-        <div className="z-10 w-full max-w-4xl">
-          <p className="text-primary text-base md:text-xl mb-4 font-medium">
-            Olá, mundo! Eu sou a
-          </p>
-          <h1 className="text-[clamp(2rem,12vw,5rem)] font-black text-primary uppercase leading-[0.9] tracking-tighter">
-            <EditableConfig
-              configKey="hero_title"
-              value={configs.hero_title}
-              isLogged={isLogged}
-              onUpdate={updateLocalConfig}
-            />
-          </h1>
-          <div className="mt-8 text-content-secondary text-sm md:text-lg max-w-3xl">
-            <EditableConfig
-              configKey="bio_text"
-              value={configs.bio_text}
-              isLogged={isLogged}
-              onUpdate={updateLocalConfig}
-            />
-          </div>
-          <a
-            href={configs.cv_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-10 inline-block px-10 py-3 border border-primary text-primary hover:bg-primary/10 uppercase tracking-widest text-[10px] font-bold"
-          >
-            BAIXAR CV
-          </a>
-        </div>
-
-        <img
-          src="https://res.cloudinary.com/dbr43jqca/image/upload/v1775090801/icon_dikmyu.png"
-          className="hidden md:block absolute -right-6 top-1/2 -translate-y-1/2 w-[500px] opacity-[0.04] pointer-events-none select-none"
-          alt="Background Icon"
-        />
-      </section>
+      <Hero
+        configs={configs}
+        isLogged={isLogged}
+        onUpdate={updateLocalConfig}
+      />
 
       {/* Sobre Mim */}
-      <section className="py-24" id="sobre">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div className="relative w-64 h-64 md:w-96 md:h-96 mx-auto">
-            <div className="absolute inset-0 rounded-full border-2 border-primary shadow-[0_0_15px_rgba(0,207,200,0.2)]"></div>
-            <div className="absolute inset-3 rounded-full overflow-hidden bg-surface-card">
-              <img
-                src={configs.photo_url || "sua-foto-padrao.jpg"}
-                className="w-full h-full object-cover"
-                alt="Foto"
-              />
-            </div>
-            {isLogged && (
-              <div className="absolute bottom-4 right-4 z-20 bg-surface-base/80 p-2 rounded-full border border-primary/20 backdrop-blur-sm scale-75 hover:scale-100 transition-all">
-                <EditableConfig
-                  configKey="photo_url"
-                  value={configs.photo_url}
-                  isLogged={isLogged}
-                  onUpdate={updateLocalConfig}
-                  type="file"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col items-start md:items-end text-left md:text-right">
-            <div className="flex flex-col items-start md:items-end mb-8 w-full">
-              <h2 className="text-2xl font-light text-content-primary uppercase tracking-widest">
-                <span className="text-primary font-bold">2.</span>sobre mim
-              </h2>
-              <div className="w-64 md:w-[450px] border-b-2 border-primary/40 mt-1"></div>
-            </div>
-            <h3 className="text-content-secondary font-bold text-sm mb-6 uppercase tracking-widest">
-              Clara Bessa · {calculateAge("1999-09-09")} anos · ela/dela
-            </h3>
-            <div className="text-content-secondary leading-relaxed text-base md:text-lg max-w-xl">
-              <EditableConfig
-                configKey="bio"
-                value={configs.bio}
-                isLogged={isLogged}
-                onUpdate={updateLocalConfig}
-                type="textarea"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <About
+        configs={configs}
+        isLogged={isLogged}
+        onUpdate={updateLocalConfig}
+        calculateAge={calculateAge} 
+      />
 
       {/* Experiência */}
-      <section id="experiencia" className="py-24 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-light text-content-primary uppercase tracking-widest mb-12">
-          <span className="text-primary font-bold">3.</span>experiência
-          <div className="w-64 border-b-2 border-primary/40 mt-1"></div>
-        </h2>
-
-        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-          {/* Lista de Empresas (Abas) */}
-          <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible border-l-2 md:border-l-2 border-primary/10 min-w-[200px]">
-            {experiences.map((exp, index) => (
-              <button
-                key={exp.id}
-                onClick={() => setActiveExp(index)}
-                className={`px-6 py-4 text-left text-xs uppercase tracking-widest transition-all whitespace-nowrap
-            ${
-              activeExp === index
-                ? "text-primary border-l-2 md:border-l-2 border-primary -ml-[2px] bg-primary/5"
-                : "text-content-secondary hover:text-primary hover:bg-primary/5"
-            }`}
-              >
-                {exp.company_name}
-              </button>
-            ))}
-
-            {isLogged && (
-              <button
-                onClick={handleCreateExperience}
-                className="px-6 py-4 text-left text-xs text-green-400 font-bold uppercase opacity-50 hover:opacity-100"
-              >
-                + Adicionar nova
-              </button>
-            )}
-          </div>
-
-          {/* Detalhes da Experiência Ativa */}
-          <div className="flex-1 min-h-[300px]">
-            {experiences.length > 0 && experiences[activeExp] ? (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-2">
-                  <div>
-                    <h3 className="text-xl font-bold text-primary">
-                      <EditableConfig
-                        configKey="role"
-                        value={experiences[activeExp].role}
-                        isLogged={isLogged}
-                        onUpdate={(key, val) =>
-                          handleUpdateExperience(
-                            experiences[activeExp].id,
-                            key,
-                            val,
-                          )
-                        }
-                      />
-                    </h3>
-
-                    {/* Nome da Empresa - Agora Editável */}
-                    <div className="text-content-secondary text-sm mt-1">
-                      <EditableConfig
-                        configKey="company_name"
-                        value={experiences[activeExp].company_name}
-                        isLogged={isLogged}
-                        onUpdate={(key, val) =>
-                          handleUpdateExperience(
-                            experiences[activeExp].id,
-                            key,
-                            val,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <span className="text-content-secondary font-mono text-sm">
-                    <EditableConfig
-                      configKey="period"
-                      value={experiences[activeExp].period}
-                      isLogged={isLogged}
-                      onUpdate={(key, val) =>
-                        handleUpdateExperience(
-                          experiences[activeExp].id,
-                          key,
-                          val,
-                        )
-                      }
-                    />
-                  </span>
-                </div>
-
-                <div className="text-content-secondary leading-relaxed text-md space-y-4">
-                  <EditableConfig
-                    configKey="description"
-                    value={experiences[activeExp].description}
-                    type="textarea"
-                    isLogged={isLogged}
-                    onUpdate={(key, val) =>
-                      handleUpdateExperience(
-                        experiences[activeExp].id,
-                        key,
-                        val,
-                      )
-                    }
-                  />
-                </div>
-
-                {isLogged && (
-                  <button
-                    onClick={() =>
-                      handleDeleteExperience(experiences[activeExp].id)
-                    }
-                    className="mt-8 text-[10px] text-red-400/50 hover:text-red-400 uppercase font-bold"
-                  >
-                    Excluir esta experiência
-                  </button>
-                )}
-              </div>
-            ) : (
-              <p className="text-content-secondary italic">
-                Nenhuma experiência encontrada.
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
+      <Experience
+        experiences={experiences}
+        activeExp={activeExp}
+        setActiveExp={setActiveExp}
+        isLogged={isLogged}
+        handleCreateExperience={handleCreateExperience}
+        handleUpdateExperience={handleUpdateExperience}
+        handleDeleteExperience={handleDeleteExperience}
+      />
 
       {/* FOOTER COM GATILHO DE LOGIN SUTIL */}
       <footer className="py-10 border-t border-white/5 flex justify-between items-center text-[10px] text-content-secondary uppercase tracking-widest">

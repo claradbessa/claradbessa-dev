@@ -9,7 +9,7 @@ const Login = ({ onLoginSuccess }) => {
     e.preventDefault();
     try {
       const res = await api.post("/login", { email, password });
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("auth_token", res.data.token);
       onLoginSuccess();
     } catch (err) {
       alert("E-mail ou senha incorretos.");

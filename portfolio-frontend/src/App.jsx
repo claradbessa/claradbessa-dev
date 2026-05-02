@@ -7,6 +7,10 @@ function App() {
   const [isLogged, setIsLogged] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+
+  const [experiences, setExperiences] = useState([]);
+  const [activeExp, setActiveExp] = useState(0);
+
   const [configs, setConfigs] = useState({
     hero_title: "",
     bio_text: "",
@@ -36,29 +40,48 @@ function App() {
 
   const loadInitialData = async () => {
     try {
-      const [resConfigs, resAbout] = await Promise.all([
+      const results = await Promise.allSettled([
         api.get("/configs"),
-        api.get("/about"), 
+        api.get("/about"),
+        api.get("/experiences"),
       ]);
 
-      setConfigs({
-        hero_title: resConfigs.data.hero_title || "Clara Bessa",
-        bio_text: resConfigs.data.bio_text || "",
-        cv_url: resConfigs.data.cv_url || "",
+      const resConfigs =
+        results[0].status === "fulfilled" ? results[0].value.data || {} : {};
+      const resAbout =
+        results[1].status === "fulfilled" ? results[1].value.data || {} : {};
+      const resExp =
+        results[2].status === "fulfilled" ? results[2].value.data || [] : [];
 
-        bio: resAbout.data?.bio || "",
-        photo_url: resAbout.data?.photo_url || "",
-        technologies: resAbout.data?.technologies || [],
+      const allLoaded = results.every((res) => res.status === "fulfilled");
+      if (allLoaded) {
+        console.log("✅ Todos os dados carregados!");
+      } else {
+        console.warn(
+          "⚠️ Alguns dados falharam ao carregar, verifique o banco.",
+        );
+      }
+
+      setConfigs({
+        hero_title: resConfigs.hero_title || "Clara Bessa",
+        bio_text: resConfigs.bio_text || "",
+        cv_url: resConfigs.cv_url || "",
+
+        bio: resAbout.bio || "",
+        photo_url: resAbout.photo_url || "",
+        technologies: resAbout.technologies || [],
       });
 
-      console.log("✅ Todos os dados carregados com sucesso!");
+      setExperiences(Array.isArray(resExp) ? resExp : []);
+
+      console.log("✅ Dados sincronizados com sucesso!");
     } catch (err) {
-      console.error("❌ Erro ao carregar dados:", err);
+      console.error("❌ Erro crítico ao carregar dados:", err);
     }
   };
 
   const updateLocalConfig = async (key, value) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("auth_token");
     if (!token) return;
 
     try {
@@ -97,8 +120,69 @@ function App() {
     }
   };
 
+  const handleUpdateExperience = async (id, key, value) => {
+    const token = localStorage.getItem("auth_token");
+    try {
+      await api.put(
+        `/panel/experiences/${id}`,
+        { [key]: value },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      setExperiences((prev) =>
+        prev.map((exp) => (exp.id === id ? { ...exp, [key]: value } : exp)),
+      );
+    } catch (err) {
+      console.error("Erro ao atualizar experiência");
+    }
+  };
+
+  const handleCreateExperience = async () => {
+    const token = localStorage.getItem("auth_token");
+    try {
+      const res = await api.post(
+        "/panel/experiences",
+        {
+          company_name: "Nova Empresa",
+          role: "Novo Cargo",
+          period: "2024 - Atual",
+          description: "Descreva suas atividades aqui...",
+          tags: [],
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      setExperiences((prev) => [res.data, ...prev]);
+      setActiveExp(0);
+
+      console.log("✅ Experiência criada com sucesso!");
+    } catch (err) {
+      console.error("❌ Erro ao criar:", err.response?.data || err.message);
+    }
+  };
+
+  const handleDeleteExperience = async (id) => {
+    const token = localStorage.getItem("auth_token");
+    if (!window.confirm("Tem certeza que deseja excluir esta experiência?"))
+      return;
+
+    try {
+      await api.delete(`/panel/experiences/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setExperiences((prev) => prev.filter((exp) => exp.id !== id));
+      setActiveExp(0);
+      console.log("✅ Experiência removida");
+    } catch (err) {
+      console.error("❌ Erro ao excluir");
+    }
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("auth_token");
     setIsLogged(false);
   };
 
@@ -113,7 +197,7 @@ function App() {
 
   useEffect(() => {
     loadInitialData();
-    if (localStorage.getItem("token")) setIsLogged(true);
+    if (localStorage.getItem("auth_token")) setIsLogged(true);
   }, []);
 
   return (
@@ -250,6 +334,131 @@ function App() {
         </div>
       </section>
 
+      {/* Experiência */}
+      <section id="experiencia" className="py-24 max-w-5xl mx-auto">
+        <h2 className="text-2xl font-light text-content-primary uppercase tracking-widest mb-12">
+          <span className="text-primary font-bold">3.</span>experiência
+          <div className="w-64 border-b-2 border-primary/40 mt-1"></div>
+        </h2>
+
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
+          {/* Lista de Empresas (Abas) */}
+          <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible border-l-2 md:border-l-2 border-primary/10 min-w-[200px]">
+            {experiences.map((exp, index) => (
+              <button
+                key={exp.id}
+                onClick={() => setActiveExp(index)}
+                className={`px-6 py-4 text-left text-xs uppercase tracking-widest transition-all whitespace-nowrap
+            ${
+              activeExp === index
+                ? "text-primary border-l-2 md:border-l-2 border-primary -ml-[2px] bg-primary/5"
+                : "text-content-secondary hover:text-primary hover:bg-primary/5"
+            }`}
+              >
+                {exp.company_name}
+              </button>
+            ))}
+
+            {isLogged && (
+              <button
+                onClick={handleCreateExperience}
+                className="px-6 py-4 text-left text-xs text-green-400 font-bold uppercase opacity-50 hover:opacity-100"
+              >
+                + Adicionar nova
+              </button>
+            )}
+          </div>
+
+          {/* Detalhes da Experiência Ativa */}
+          <div className="flex-1 min-h-[300px]">
+            {experiences.length > 0 && experiences[activeExp] ? (
+              <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-2">
+                  <div>
+                    <h3 className="text-xl font-bold text-primary">
+                      <EditableConfig
+                        configKey="role"
+                        value={experiences[activeExp].role}
+                        isLogged={isLogged}
+                        onUpdate={(key, val) =>
+                          handleUpdateExperience(
+                            experiences[activeExp].id,
+                            key,
+                            val,
+                          )
+                        }
+                      />
+                    </h3>
+
+                    {/* Nome da Empresa - Agora Editável */}
+                    <div className="text-content-secondary text-sm mt-1">
+                      <EditableConfig
+                        configKey="company_name"
+                        value={experiences[activeExp].company_name}
+                        isLogged={isLogged}
+                        onUpdate={(key, val) =>
+                          handleUpdateExperience(
+                            experiences[activeExp].id,
+                            key,
+                            val,
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <span className="text-content-secondary font-mono text-sm">
+                    <EditableConfig
+                      configKey="period"
+                      value={experiences[activeExp].period}
+                      isLogged={isLogged}
+                      onUpdate={(key, val) =>
+                        handleUpdateExperience(
+                          experiences[activeExp].id,
+                          key,
+                          val,
+                        )
+                      }
+                    />
+                  </span>
+                </div>
+
+                <div className="text-content-secondary leading-relaxed text-md space-y-4">
+                  <EditableConfig
+                    configKey="description"
+                    value={experiences[activeExp].description}
+                    type="textarea"
+                    isLogged={isLogged}
+                    onUpdate={(key, val) =>
+                      handleUpdateExperience(
+                        experiences[activeExp].id,
+                        key,
+                        val,
+                      )
+                    }
+                  />
+                </div>
+
+                {isLogged && (
+                  <button
+                    onClick={() =>
+                      handleDeleteExperience(experiences[activeExp].id)
+                    }
+                    className="mt-8 text-[10px] text-red-400/50 hover:text-red-400 uppercase font-bold"
+                  >
+                    Excluir esta experiência
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="text-content-secondary italic">
+                Nenhuma experiência encontrada.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER COM GATILHO DE LOGIN SUTIL */}
       <footer className="py-10 border-t border-white/5 flex justify-between items-center text-[10px] text-content-secondary uppercase tracking-widest">
         <p>© 2026 Clara Bessa</p>
@@ -271,7 +480,7 @@ function App() {
               onClick={() => setShowLogin(false)}
               className="absolute top-4 right-4 text-primary text-xl"
             >
-              ✕
+              .
             </button>
             <Login
               onLoginSuccess={() => {

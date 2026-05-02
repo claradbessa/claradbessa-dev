@@ -6,6 +6,7 @@ import EditableConfig from "./components/EditableConfig";
 import Hero from "./components/sections/Hero";
 import About from "./components/sections/About";
 import Experience from "./components/sections/Experience";
+import Contact from "./components/sections/Contact";
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
@@ -22,6 +23,7 @@ function App() {
     cv_url: "",
     photo_url: "",
     technologies: [],
+    contact_text: "",
   });
 
   useEffect(() => {
@@ -74,6 +76,8 @@ function App() {
         bio: resAbout.bio || "",
         photo_url: resAbout.photo_url || "",
         technologies: resAbout.technologies || [],
+
+        contact_text: resConfigs.contact_text || "VAMOS CONVERSAR?...",
       });
 
       setExperiences(Array.isArray(resExp) ? resExp : []);
@@ -216,25 +220,39 @@ function App() {
           />
           <div className="flex items-center gap-6">
             <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-bold">
+              {/* 1. HOME */}
               <a
                 href="#home"
                 className={`${activeSection === "home" ? "text-primary" : "text-content-secondary"} hover:text-primary transition-all`}
               >
                 <span className="text-primary font-bold">1.</span> home
               </a>
+
+              {/* 2. SOBRE */}
               <a
                 href="#sobre"
                 className={`${activeSection === "sobre" ? "text-primary" : "text-content-secondary"} hover:text-primary transition-all`}
               >
                 <span className="text-primary font-bold">2.</span> sobre
               </a>
+
+              {/* 3. EXPERIÊNCIA (Corrigido de Projetos para Experiência) */}
               <a
-                href="#projetos"
-                className={`${activeSection === "projetos" ? "text-primary" : "text-content-secondary"} hover:text-primary transition-all`}
+                href="#experiencia"
+                className={`${activeSection === "experiencia" ? "text-primary" : "text-content-secondary"} hover:text-primary transition-all`}
               >
-                <span className="text-primary font-bold">3.</span> projetos
+                <span className="text-primary font-bold">3.</span> experiência
+              </a>
+
+              {/* 4. CONTATO (Atualizado com as classes de estado ativo) */}
+              <a
+                href="#contato"
+                className={`${activeSection === "contato" ? "text-primary" : "text-content-secondary"} hover:text-primary transition-all`}
+              >
+                <span className="text-primary font-bold">4.</span> contato
               </a>
             </div>
+
             {isLogged && (
               <button
                 onClick={handleLogout}
@@ -260,7 +278,7 @@ function App() {
         configs={configs}
         isLogged={isLogged}
         onUpdate={updateLocalConfig}
-        calculateAge={calculateAge} 
+        calculateAge={calculateAge}
       />
 
       {/* Experiência */}
@@ -272,6 +290,13 @@ function App() {
         handleCreateExperience={handleCreateExperience}
         handleUpdateExperience={handleUpdateExperience}
         handleDeleteExperience={handleDeleteExperience}
+      />
+
+      {/* Contato */}
+      <Contact
+        configs={configs}
+        isLogged={isLogged}
+        onUpdate={updateLocalConfig}
       />
 
       {/* FOOTER COM GATILHO DE LOGIN SUTIL */}

@@ -38,7 +38,7 @@ const Hero = ({ configs, isLogged, onUpdate }) => {
 
       <img
         src="https://res.cloudinary.com/dbr43jqca/image/upload/v1775090801/icon_dikmyu.png"
-        className="hidden md:block absolute -right-6 top-1/2 -translate-y-1/2 w-[500px] opacity-[0.04] pointer-events-none select-none"
+        className="hidden md:block absolute -right-6 top-1/2 -translate-y-1/2 w-[500px] opacity-[0.08] pointer-events-none select-none"
         alt="Background Icon"
       />
     </section>

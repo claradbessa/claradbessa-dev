@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AboutPageController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SiteConfigController;
 use App\Http\Controllers\Api\ExperienceController;
+use App\Http\Controllers\Api\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,7 @@ Route::get('/configs', [SiteConfigController::class, 'index']);
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);
 Route::get('/experiences', [ExperienceController::class, 'index']);
+Route::post('/contact', [MessageController::class, 'store']);
 
 
 // Rota de Teste

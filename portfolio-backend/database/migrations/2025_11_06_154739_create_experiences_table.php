@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('role');
             $table->string('period');
             $table->text('description');
-            $table->json('tags');
+            $table->json('tags')->nullable();
             $table->timestamps();
         });
     }

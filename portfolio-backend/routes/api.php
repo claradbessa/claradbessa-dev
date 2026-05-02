@@ -6,21 +6,23 @@ use App\Http\Controllers\Api\HomePageController;
 use App\Http\Controllers\Api\AboutPageController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SiteConfigController;
+use App\Http\Controllers\Api\ExperienceController;
 
 /*
 |--------------------------------------------------------------------------
 | Rotas Públicas (Vitrine)
 |--------------------------------------------------------------------------
 */
-Route::get('/home', [HomePageController::class, 'index']); 
+Route::get('/home', [HomePageController::class, 'index']);
 Route::get('/about', [AboutPageController::class, 'index']);
-Route::get('/about', [App\Http\Controllers\Api\AboutPageController::class, 'index']);
 Route::get('/configs', [SiteConfigController::class, 'index']);
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);
+Route::get('/experiences', [ExperienceController::class, 'index']);
+
 
 // Rota de Teste
-Route::post('/test-post', function () { 
+Route::post('/test-post', function () {
     return response()->json(['message' => 'O MÉTODO POST FUNCIONOU!', 'status' => 200]);
 });
 
@@ -30,7 +32,7 @@ Route::post('/test-post', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum'])->group(function () {
-    
+
     // Retorna os dados do usuário logado
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -38,22 +40,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Todas as rotas abaixo terão o prefixo /api/panel/
     Route::prefix('panel')->group(function () {
-        
+
         // Configurações Gerais
         Route::put('/configs', [SiteConfigController::class, 'update']);
-
+        
         // Home e About
         Route::post('/home', [HomePageController::class, 'update']);
         Route::post('/about', [AboutPageController::class, 'update']);
 
+        // Experiências
+        Route::post('/experiences', [ExperienceController::class, 'store']);
+        Route::put('/experiences/{id}', [ExperienceController::class, 'update']);
+        Route::delete('/experiences/{id}', [ExperienceController::class, 'destroy']);
+
         // CRUD de Projetos
         Route::post('/projects', [ProjectController::class, 'store']);
-        
-        Route::post('/projects/{project}', [ProjectController::class, 'update']); 
-        
+        Route::post('/projects/{project}', [ProjectController::class, 'update']);
         Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
     });
 });
 
 // Importa as rotas de autenticação (Breeze/Sanctum)
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

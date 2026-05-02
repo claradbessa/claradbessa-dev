@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\SiteConfig; 
+use App\Models\SiteConfig;
 use Illuminate\Http\Request;
 
 class SiteConfigController extends Controller
 {
     public function index()
     {
-        // Retorna as configurações como um objeto: { "hero_title": "Valor", "bio": "..." }
-        return response()->json(SiteConfig::pluck('value', 'key'));
+        $configs = \App\Models\SiteConfig::pluck('value', 'key');
+
+        return response()->json($configs ?: new \stdClass());
     }
 
     public function update(Request $request)

@@ -11,16 +11,21 @@ class AboutPageController extends Controller
 {
     public function index()
     {
-        $aboutData = AboutPage::first();
+        $aboutData = \App\Models\AboutPage::first() ?: [
+            'bio' => '',
+            'photo_url' => '',
+            'technologies' => []
+        ];
+
         return response()->json($aboutData);
     }
 
     public function update(Request $request)
     {
         $request->validate([
-            'photo_url' => 'sometimes',
+            'photo_url' => 'sometimes|file|image|max:5120',
             'bio' => 'sometimes|string',
-            'technologies' => 'nullable',
+            'technologies' => 'sometimes|array',
         ]);
 
         $aboutData = AboutPage::first() ?: new AboutPage();
@@ -28,7 +33,7 @@ class AboutPageController extends Controller
         if ($request->has('bio')) {
             $aboutData->bio = $request->bio;
         } elseif (!$aboutData->exists) {
-            $aboutData->bio = ""; 
+            $aboutData->bio = "";
         }
 
         if ($request->hasFile('photo_url')) {
@@ -37,10 +42,12 @@ class AboutPageController extends Controller
         } elseif ($request->has('photo_url')) {
             $aboutData->photo_url = $request->photo_url;
         } elseif (!$aboutData->exists) {
-            $aboutData->photo_url = ""; 
+            $aboutData->photo_url = "";
         }
 
-        if (!$aboutData->exists && !$request->has('technologies')) {
+        if ($request->has('technologies')) {
+            $aboutData->technologies = $request->technologies; // ← adicionado
+        } elseif (!$aboutData->exists) {
             $aboutData->technologies = [];
         }
 
